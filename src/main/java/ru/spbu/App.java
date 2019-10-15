@@ -18,12 +18,6 @@ public class App {
     }};*/
 
     /*private static Map<Integer, List<String>> graph = new HashMap<Integer, List<String>>() {{
-        put(1, listOf("2"));
-        put(2, listOf("1", "3"));
-        put(3, listOf("2"));
-    }};*/
-
-    private static Map<Integer, List<String>> graph = new HashMap<Integer, List<String>>() {{
         put(1, listOf("2", "10"));
         put(2, listOf("1", "3"));
         put(3, listOf("2", "4"));
@@ -34,9 +28,20 @@ public class App {
         put(8, listOf("7", "9"));
         put(9, listOf("8", "10"));
         put(10, listOf("9", "1"));
+    }};*/
+
+    private static Map<Integer, List<String>> graph = new HashMap<Integer, List<String>>() {{
+        put(1, listOf("7", "10"));
+        put(2, listOf("3", "5", "7"));
+        put(3, listOf("2", "8"));
+        put(4, listOf("7", "10"));
+        put(5, listOf("2"));
+        put(6, listOf("9"));
+        put(7, listOf("1", "2", "4"));
+        put(8, listOf("3"));
+        put(9, listOf("6", "10"));
+        put(10, listOf("1", "9"));
     }};
-
-
 
     public static void main(String[] args) {
         Runtime rt = Runtime.instance();
