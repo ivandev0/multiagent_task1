@@ -13,7 +13,6 @@ public class AgentWithNumber extends Agent {
     private String[] linkedAgents;
     private Integer id, number, graphSize;
     private Map<Integer, Integer> idToNumber = new HashMap<>();
-    private Map<String, List<String>> newInfo = new HashMap<>();
 
     @Override
     protected void setup() {
@@ -29,12 +28,6 @@ public class AgentWithNumber extends Agent {
         graphSize = Integer.parseInt(String.valueOf(args[args.length - 1]));
         System.out.println("Agent #" + id + " with num = " + number + " and with neighbours: " + String.join(" ", linkedAgents));
 
-        /*newInfo = new HashMap<String, List<String>>() {{
-            put(
-                String.valueOf(id),
-                new ArrayList<String>() {{ add(id + " " + number + " "); }}
-                );
-        }};*/
         addBehaviour(new Send());
         addBehaviour(new Consume());
     }
@@ -45,7 +38,6 @@ public class AgentWithNumber extends Agent {
             if (msg != null) {
                 int lastSize = idToNumber.size();
                 String sender = msg.getSender().getName().split("@")[0];
-                List<String> receivedData = new ArrayList<>();
 
                 String content = msg.getContent();
                 StringTokenizer pairs = new StringTokenizer(content, ";");
@@ -53,16 +45,9 @@ public class AgentWithNumber extends Agent {
                     StringTokenizer pair = new StringTokenizer(pairs.nextToken());
                     Integer id = Integer.valueOf(pair.nextToken());
                     Integer number = Integer.valueOf(pair.nextToken());
-                    receivedData.add(id + " " + number);
                     idToNumber.put(id, number);
                 }
                 System.out.println("Agent #" + id + " got " + content + " from " + sender);
-
-                if (newInfo.containsKey(sender)) {
-                    newInfo.get(sender).addAll(receivedData);
-                } else {
-                    newInfo.put(sender, receivedData);
-                }
 
                 if (idToNumber.size() != lastSize) {
                     myAgent.addBehaviour(new Send());
@@ -86,29 +71,21 @@ public class AgentWithNumber extends Agent {
 
     class Send extends OneShotBehaviour {
         public void action() {
-            //for (Map.Entry<String, List<String>> entryMain : newInfo.entrySet()) {
+            ACLMessage inform = new ACLMessage(ACLMessage.INFORM);
+            for (String neighbour : linkedAgents) {
+                    inform.addReceiver(new AID(neighbour, AID.ISLOCALNAME));
+            }
 
-                ACLMessage inform = new ACLMessage(ACLMessage.INFORM);
-                for (String neighbour : linkedAgents) {
-                    //if (!entryMain.getKey().equals(neighbour))
-                        inform.addReceiver(new AID(neighbour, AID.ISLOCALNAME));
+            if (inform.getAllReceiver().hasNext()) {
+                StringBuilder sb = new StringBuilder();
+                for (Map.Entry<Integer, Integer> entry : idToNumber.entrySet()) {
+                    sb.append(entry.getKey()).append(" ").append(entry.getValue()).append(";");
                 }
+                inform.setContent(sb.toString());
 
-                if (inform.getAllReceiver().hasNext()) {
-                    StringBuilder sb = new StringBuilder();
-                    for (Map.Entry<Integer, Integer> entry : idToNumber.entrySet()) {
-                        sb.append(entry.getKey()).append(" ").append(entry.getValue()).append(";");
-                    }
-                    /*for (String i : entryMain.getValue()) {
-                        sb.append(i).append(";");
-                    }*/
-                    inform.setContent(sb.toString());
-
-                    System.out.println("Agent #" + id + " sent " + sb);
-                    myAgent.send(inform);
-                }
-            //}
-            //newInfo.clear();
+                System.out.println("Agent #" + id + " sent " + sb);
+                myAgent.send(inform);
+            }
         }
     }
 }
